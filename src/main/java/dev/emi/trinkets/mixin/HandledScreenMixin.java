@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import dev.emi.trinkets.TrinketScreenManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.render.RenderLayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -61,13 +62,14 @@ public abstract class HandledScreenMixin extends Screen {
 			RenderSystem.enableDepthTest();
 
 			if (ts.isTrinketFocused()) {
+				context.getMatrices().translate(0, 0, 310);
 				// Thus, I need to draw trinket slot backs over normal items at z 300 (310 was chosen)
-				context.drawTexture(slotTextureId, slot.x, slot.y, 310, 0, 0, 16, 16, 16, 16);
+				context.drawTexture(RenderLayer::getGuiTextured, slotTextureId, slot.x, slot.y,0, 0, 16, 16, 16, 16);
 				// I also need to draw items in trinket slots *above* 310 but *below* 400, (320 for items and 370 for tooltips was chosen)
-				context.getMatrices().translate(0, 0, 70);
+				context.getMatrices().translate(0, 0, 10);
 			} else {
-				context.drawTexture(slotTextureId, slot.x, slot.y, 0, 0, 0, 16, 16, 16, 16);
-				context.drawTexture(MORE_SLOTS, slot.x - 1, slot.y - 1, 0, 4, 4, 18, 18, 256, 256);
+				context.drawTexture(RenderLayer::getGuiTextured, slotTextureId, slot.x, slot.y,0, 0, 16, 16, 16, 16);
+				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slot.x - 1, slot.y - 1, 4, 4, 18, 18, 256, 256);
 			}
 		}
 		if (TrinketsClient.activeGroup != null && TrinketsClient.activeGroup.getSlotId() == slot.id) {

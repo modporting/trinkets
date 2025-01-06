@@ -8,6 +8,7 @@ import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.gui.screen.ingame.RecipeBookScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
@@ -54,8 +55,8 @@ public class SurvivalTrinketSlot extends Slot implements TrinketSlot {
 				if (world.isClient) {
 					MinecraftClient client = MinecraftClient.getInstance();
 					Screen s = client.currentScreen;
-					if (s instanceof InventoryScreen screen) {
-						if (screen.getRecipeBookWidget().isOpen()) {
+					if (s instanceof TrinketScreen screen) {
+						if (screen.trinkets$isRecipeBookOpen()) {
 							return false;
 						}
 					}

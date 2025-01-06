@@ -9,6 +9,7 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.Rect2i;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Identifier;
@@ -196,13 +197,13 @@ public class TrinketScreenManager {
 		int x = r.getX() - 4 - (slotsWidth - 1) / 2 * 18;
 		int y = r.getY() - 4;
 		if (slotsWidth > 1 || type != null) {
-			context.drawTexture(MORE_SLOTS, x, y, 0, 0, 4, 26);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x, y, 0, 0, 4, 26, 256, 256);
 
 			for (int i = 0; i < slotsWidth; i++) {
-				context.drawTexture(MORE_SLOTS, x + i * 18 + 4, y, 4, 0, 18, 26);
+				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x + i * 18 + 4, y, 4, 0, 18, 26, 256, 256);
 			}
 
-			context.drawTexture(MORE_SLOTS, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x + slotsWidth * 18 + 4, y, 22, 0, 4, 26, 256, 256);
 			for (int s = 0; s < slotHeights.size() && s < slotTypes.size(); s++) {
 				if (slotTypes.get(s) != type) {
 					continue;
@@ -214,18 +215,18 @@ public class TrinketScreenManager {
 					int bottom = height / 2;
 					int slotX = slotHeight.x() - 4 + r.getX();
 					if (height > 2) {
-						context.drawTexture(MORE_SLOTS, slotX, y - top * 18, 0, 0, 26, 4);
+						context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slotX, y - top * 18, 0, 0, 26, 4, 256, 256);
 					}
 
 					for (int i = 1; i < top + 1; i++) {
-						context.drawTexture(MORE_SLOTS, slotX, y - i * 18 + 4, 0, 4, 26, 18);
+						context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slotX, y - i * 18 + 4, 0, 4, 26, 18, 256, 256);
 					}
 
 					for (int i = 1; i < bottom + 1; i++) {
-						context.drawTexture(MORE_SLOTS, slotX, y + i * 18 + 4, 0, 4, 26, 18);
+						context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slotX, y + i * 18 + 4, 0, 4, 26, 18, 256, 256);
 					}
 
-					context.drawTexture(MORE_SLOTS, slotX, y + 18 + bottom * 18 + 4, 0, 22, 26, 4);
+					context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slotX, y + 18 + bottom * 18 + 4, 0, 22, 26, 4, 256, 256);
 				}
 			}
 
@@ -241,17 +242,17 @@ public class TrinketScreenManager {
 				int slotX = slotHeight.x() + r.getX() + 1;
 				int top = (height - 1) / 2;
 				int bottom = height / 2;
-				context.drawTexture(MORE_SLOTS, slotX, y - top * 18 + 1, 4, 1, 16, 3);
-				context.drawTexture(MORE_SLOTS, slotX, y + (bottom + 1) * 18 + 4, 4, 22, 16, 3);
+				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slotX, y - top * 18 + 1, 4, 1, 16, 3, 256, 256);
+				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slotX, y + (bottom + 1) * 18 + 4, 4, 22, 16, 3, 256, 256);
 			}
 
 			// Because pre-existing slots are not part of the slotHeights list
 			if (group.getSlotId() != -1) {
-				context.drawTexture(MORE_SLOTS, r.getX() + 1, y + 1, 4, 1, 16, 3);
-				context.drawTexture(MORE_SLOTS, r.getX() + 1, y + 22, 4, 22, 16, 3);
+				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, r.getX() + 1, y + 1, 4, 1, 16, 3, 256, 256);
+				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, r.getX() + 1, y + 22, 4, 22, 16, 3, 256, 256);
 			}
 		} else {
-			context.drawTexture(MORE_SLOTS, x + 4, y + 4, 4, 4, 18, 18);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x + 4, y + 4, 4, 4, 18, 18, 256, 256);
 		}
 
 		context.getMatrices().pop();
@@ -280,37 +281,37 @@ public class TrinketScreenManager {
 			height = 4;
 			width--;
 		}
-		context.drawTexture(MORE_SLOTS, x + 3, y,      7, 26, 1, 7);
+		context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x + 3, y,7, 26, 1, 7, 256, 256);
 		// Repeated tops and bottoms
 		for (int i = 0; i < width; i++) {
-			context.drawTexture(MORE_SLOTS, x - 15 - 18 * i, y,      7, 26, 18, 7);
-			context.drawTexture(MORE_SLOTS, x - 15 - 18 * i, y + 79, 7, 51, 18, 7);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 15 - 18 * i, y,      7, 26, 18, 7, 256, 256);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 15 - 18 * i, y + 79, 7, 51, 18, 7, 256, 256);
 		}
 		// Top and bottom
-		context.drawTexture(MORE_SLOTS, x - 15 - 18 * width, y,                   7, 26, 18, 7);
-		context.drawTexture(MORE_SLOTS, x - 15 - 18 * width, y + 7 + 18 * height, 7, 51, 18, 7);
+		context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 15 - 18 * width, y,                   7, 26, 18, 7, 256, 256);
+		context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 15 - 18 * width, y + 7 + 18 * height, 7, 51, 18, 7, 256, 256);
 		// Corners
-		context.drawTexture(MORE_SLOTS, x - 22 - 18 * width, y,                   0, 26, 7, 7);
-		context.drawTexture(MORE_SLOTS, x - 22 - 18 * width, y + 7 + 18 * height, 0, 51, 7, 7);
+		context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 22 - 18 * width, y,                   0, 26, 7, 7, 256, 256);
+		context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 22 - 18 * width, y + 7 + 18 * height, 0, 51, 7, 7, 256, 256);
 		// Outer sides
 		for (int i = 0; i < height; i++) {
-			context.drawTexture(MORE_SLOTS, x - 22 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 22 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18, 256, 256);
 		}
 		// Inner sides
 		if (width > 0) {
 			for (int i = height; i < 4; i++) {
-				context.drawTexture(MORE_SLOTS, x - 4 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18);
+				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 4 - 18 * width, y + 7 + 18 * i, 0, 34, 7, 18, 256, 256);
 			}
 		}
 		if (width > 0 && height < 4) {
 			// Bottom corner
-			context.drawTexture(MORE_SLOTS, x - 4 - 18 * width, y + 79, 0, 51, 7, 7);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 4 - 18 * width, y + 79, 0, 51, 7, 7, 256, 256);
 			// Inner corner
-			context.drawTexture(MORE_SLOTS, x - 4 - 18 * width, y + 7 + 18 * height, 0, 58, 7, 7);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x - 4 - 18 * width, y + 7 + 18 * height, 0, 58, 7, 7, 256, 256);
 		}
 		if (width > 0 || height == 4) {
 			// Inner corner
-			context.drawTexture(MORE_SLOTS, x, y + 79, 0, 58, 3, 7);
+			context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, x, y + 79, 0, 58, 3, 7, 256, 256);
 		}
 	}
 

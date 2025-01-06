@@ -14,7 +14,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.item.Equipment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -100,7 +99,7 @@ public interface Trinket {
 	 * @return The {@link SoundEvent} to play for equipping
 	 */
 	default RegistryEntry<SoundEvent> getEquipSound(ItemStack stack, SlotReference slot, LivingEntity entity) {
-		return stack.getItem() instanceof Equipment eq ? eq.getEquipSound() : null;
+		return null;
 	}
 
 	/**

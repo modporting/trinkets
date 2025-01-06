@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'fabric-loom' version '1.9-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -103,17 +103,14 @@ publishing {
 			from components.java
 		}
 	}
-    setupRepositories(repositories)
-}
-
-void setupRepositories(RepositoryHandler repositories) {
-	if (project.hasProperty("mavenUrl")) {
-        repositories.maven {
-            url project.mavenUrl
-            credentials {
-                username project.mavenUsername
-                password project.mavenPassword
-            }
-        }
-    }
+	repositories {
+		maven {
+			name = "nexusrealmsPorts"
+			url = uri("https://maven.riftrealms.de/ports")
+			credentials(org.gradle.api.credentials.PasswordCredentials)
+			authentication{
+				basic(BasicAuthentication)
+			}
+		}
+	}
 }

@@ -24,6 +24,7 @@ import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,6 +70,8 @@ public abstract class LivingEntityMixin extends Entity {
 	@Shadow
 	public abstract AttributeContainer getAttributes();
 
+	@Shadow public abstract boolean shouldDropExperience();
+
 	private LivingEntityMixin() {
 		super(null, null);
 	}
@@ -90,7 +93,7 @@ public abstract class LivingEntityMixin extends Entity {
 	private void dropInventory(CallbackInfo info) {
 		LivingEntity entity = (LivingEntity) (Object) this;
 
-		boolean keepInv = entity.getWorld().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
+		boolean keepInv = entity.getWorld().getServer().getGameRules().getBoolean(GameRules.KEEP_INVENTORY);
 		TrinketsApi.getTrinketComponent(entity).ifPresent(trinkets -> trinkets.forEach((ref, stack) -> {
 			if (stack.isEmpty()) {
 				return;
@@ -137,7 +140,9 @@ public abstract class LivingEntityMixin extends Entity {
 		if (((Entity) this) instanceof PlayerEntity player) {
 			ItemEntity entity = player.dropItem(stack, true, false);
 		} else {
-			ItemEntity entity = dropStack(stack);
+			if(getWorld() instanceof ServerWorld world){
+				ItemEntity entity = dropStack(world, stack);
+			}
 		}
 	}
 
