@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import dev.emi.trinkets.TrinketScreenManager;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.render.RenderLayer;
@@ -53,8 +54,8 @@ public abstract class HandledScreenMixin extends Screen {
 			TrinketScreenManager.removeSelections();
 		}
 	}
-
-	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/client/util/math/MatrixStack.translate(FFF)V"),
+	//Everything to do with slot Zs seems to be gone
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/screen/slot/Slot;isEnabled()Z"),
 		method = "drawSlot")
 	private void changeZ(DrawContext context, Slot slot, CallbackInfo info) {
 		// Items are drawn at z + 150 (normal items are drawn at 250)
@@ -70,21 +71,22 @@ public abstract class HandledScreenMixin extends Screen {
 
 			if (ts.isTrinketFocused()) {
 				// Thus, I need to draw trinket slot backs over normal items at z 300 (310 was chosen)
-				context.getMatrices().translate(0, 0, 310);
-				context.drawTexture(RenderLayer::getGuiTextured, slotTextureId, slot.x, slot.y, 0, 0, 16, 16, 16, 16);
+				//context.getMatrices().translate(0, 0, 310);
+				context.drawTexture(RenderPipelines.GUI_TEXTURED, slotTextureId, slot.x, slot.y, 0, 0, 16, 16, 16, 16);
 				if (this.focusedSlot == slot && this.focusedSlot.canBeHighlighted()) {
-					context.drawGuiTexture(RenderLayer::getGuiTextured, SLOT_HIGHLIGHT_BACK_TEXTURE, this.focusedSlot.x - 4, this.focusedSlot.y - 4, 24, 24);
+					context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, SLOT_HIGHLIGHT_BACK_TEXTURE, this.focusedSlot.x - 4, this.focusedSlot.y - 4, 24, 24);
 				}
-				context.getMatrices().translate(0, 0, -310);
+				//context.getMatrices().translate(0, 0, -310);
 				// I also need to draw items in trinket slots *above* 310 but *below* 400, (320 for items and 370 for tooltips was chosen)
-				context.getMatrices().translate(0, 0, 70);
+				//context.getMatrices().translate(0, 0, 70);
 			} else {
-				context.drawTexture(RenderLayer::getGuiTextured, slotTextureId, slot.x, slot.y, 0, 0, 16, 16, 16, 16);
-				context.drawTexture(RenderLayer::getGuiTextured, MORE_SLOTS, slot.x - 1, slot.y - 1, 4, 4, 18, 18, 256, 256);
+				context.drawTexture(RenderPipelines.GUI_TEXTURED, slotTextureId, slot.x, slot.y, 0, 0, 16, 16, 16, 16);
+				context.drawTexture(RenderPipelines.GUI_TEXTURED, MORE_SLOTS, slot.x - 1, slot.y - 1, 4, 4, 18, 18, 256, 256);
 			}
 		}
 	}
-
+	//This seems to not do anything
+	/*
 	@WrapOperation(method = "drawSlotHighlightFront", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawGuiTexture(Ljava/util/function/Function;Lnet/minecraft/util/Identifier;IIII)V"))
 	private void changeZForHighlightFront(DrawContext context, Function<Identifier, RenderLayer> renderLayers, Identifier sprite, int x, int y, int width, int height, Operation<Void> original) {
 		assert this.focusedSlot != null;
@@ -101,7 +103,7 @@ public abstract class HandledScreenMixin extends Screen {
 		} else {
 			original.call(context, renderLayers, sprite, x, y, width, height);
 		}
-	}
+	}*/
 
 	@Inject(at = @At("HEAD"), method = "isPointOverSlot", cancellable = true)
 	private void isPointOverSlot(Slot slot, double pointX, double pointY, CallbackInfoReturnable<Boolean> info) {

@@ -16,10 +16,18 @@ import com.google.common.collect.Multimap;
 
 import dev.emi.trinkets.TrinketModifiers;
 import dev.emi.trinkets.TrinketPlayerScreenHandler;
+import dev.emi.trinkets.mixin.accessor.NbtReadViewAccesor;
+import dev.emi.trinkets.mixin.accessor.NbtWriteViewAccesor;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.NbtReadView;
+import net.minecraft.storage.NbtWriteView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
+import net.minecraft.util.ErrorReporter;
 import net.minecraft.util.Identifier;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.LivingEntity;
@@ -191,9 +199,12 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 			}
 		}
 	}
-
+	//I'll leave this to the actual maintainers to figure out
+	//I'll just make it read with the old method to not get data loss when upgrading
 	@Override
-	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
+	public void readData(ReadView readView) {
+		RegistryWrapper.WrapperLookup lookup = readView.getRegistries();
+		NbtCompound tag = ((NbtReadViewAccesor) readView).getNbt();
 		DefaultedList<ItemStack> dropped = DefaultedList.of();
 		for (String groupKey : tag.getKeys()) {
 			NbtCompound groupTag = tag.getCompoundOrEmpty(groupKey);
@@ -211,7 +222,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 						for (int i = 0; i < list.size(); i++) {
 							Optional<NbtCompound> c = list.getCompound(i);
-							ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.fromNbt(lookup, c.get()).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+							ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.CODEC.parse(lookup.getOps(NbtOps.INSTANCE), c.get()).result().orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
 							if (inv != null && i < inv.size()) {
 								inv.setStack(i, stack);
 							} else {
@@ -225,7 +236,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 						NbtList list = slotTag.getListOrEmpty("Items");
 						for (int i = 0; i < list.size(); i++) {
 							Optional<NbtCompound> c = list.getCompound(i);
-							ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.fromNbt(lookup, c.get()).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+							ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.CODEC.parse(lookup.getOps(NbtOps.INSTANCE), c.get()).result().orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
 							dropped.add(stack);
 						}
 					}
@@ -288,7 +299,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 
 							for (int i = 0; i < list.size(); i++) {
 								Optional<NbtCompound> c = list.getCompound(i);
-								ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.fromNbt(buf.getRegistryManager(), c.get()).orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
+								ItemStack stack = c.isPresent() && !c.get().isEmpty() ? ItemStack.CODEC.parse(buf.getRegistryManager().getOps(NbtOps.INSTANCE), c.get()).result().orElse(ItemStack.EMPTY) : ItemStack.EMPTY;
 								if (inv != null && i < inv.size()) {
 									inv.setStack(i, stack);
 								}
@@ -305,7 +316,7 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
+	public void writeData(WriteView writeView) {
 		for (Map.Entry<String, Map<String, TrinketInventory>> group : this.getInventory().entrySet()) {
 			NbtCompound groupTag = new NbtCompound();
 			for (Map.Entry<String, TrinketInventory> slot : group.getValue().entrySet()) {
@@ -313,24 +324,24 @@ public class LivingEntityTrinketComponent implements TrinketComponent, AutoSynce
 				NbtList list = new NbtList();
 				TrinketInventory inv = slot.getValue();
 				for (int i = 0; i < inv.size(); i++) {
-					NbtCompound c = inv.getStack(i).isEmpty() ? new NbtCompound() : (NbtCompound) inv.getStack(i).toNbt(lookup);
+					NbtCompound c = inv.getStack(i).isEmpty() ? new NbtCompound() : (NbtCompound) ItemStack.CODEC.encodeStart(((NbtWriteViewAccesor) writeView).getOps(), inv.getStack(i)).getOrThrow();
 					list.add(c);
 				}
 				slotTag.put("Metadata", this.syncing ? inv.getSyncTag() : inv.toTag());
 				slotTag.put("Items", list);
 				groupTag.put(slot.getKey(), slotTag);
 			}
-			tag.put(group.getKey(), groupTag);
+			writeView.put(group.getKey(), NbtCompound.CODEC, groupTag);
 		}
 	}
-
+	//As I've said, i'll let the maintainers port this properly
 	@Override
 	public void writeSyncPacket(RegistryByteBuf buf, ServerPlayerEntity recipient) {
 		this.syncing = true;
-		NbtCompound tag = new NbtCompound();
-		this.writeToNbt(tag, buf.getRegistryManager());
+		NbtWriteView writeView = NbtWriteView.create(ErrorReporter.EMPTY, buf.getRegistryManager());
+		this.writeData(writeView);
 		this.syncing = false;
-		buf.writeNbt(tag);
+		buf.writeNbt(writeView.getNbt());
 	}
 
 	@Override
